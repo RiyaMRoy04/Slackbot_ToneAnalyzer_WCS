@@ -1,0 +1,146 @@
+[
+    {
+        "id": "ad21c5e1.4b6998",
+        "type": "slackbot-listen",
+        "z": "f7e7a375.4d87d",
+        "slackbot": "d2b8fd1c.b95b",
+        "name": "Slack Request",
+        "x": 92.5,
+        "y": 36,
+        "wires": [
+            [
+                "e6d948c8.083a38"
+            ]
+        ]
+    },
+    {
+        "id": "aef137ee.f94f8",
+        "type": "slackbot-reply",
+        "z": "f7e7a375.4d87d",
+        "slackbot": "df28efef.ac0e38",
+        "name": "",
+        "x": 765.5,
+        "y": 182,
+        "wires": []
+    },
+    {
+        "id": "e6d948c8.083a38",
+        "type": "function",
+        "z": "f7e7a375.4d87d",
+        "name": "Extract text",
+        "func": "msg.payload = msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 264.5,
+        "y": 36,
+        "wires": [
+            [
+                "320bdb95.9ada64"
+            ]
+        ]
+    },
+    {
+        "id": "320bdb95.9ada64",
+        "type": "watson-tone-analyzer-v3",
+        "z": "f7e7a375.4d87d",
+        "name": "",
+        "tones": "emotion",
+        "sentences": "true",
+        "contentType": "false",
+        "x": 471.5,
+        "y": 36,
+        "wires": [
+            [
+                "e92278a7.448678"
+            ]
+        ]
+    },
+    {
+        "id": "e92278a7.448678",
+        "type": "function",
+        "z": "f7e7a375.4d87d",
+        "name": "Extract Tone",
+        "func": "var emotions = [];\nemotions = msg.response.document_tone.tone_categories\n                .filter(function(c){\n                    if (c.category_id == \"emotion_tone\")\n                    {return c; }\n                    })[0].tones;\n\n\nfor (var i=0; i<emotions.length; i++) {\n   \n   //msg.payload=emotions[i].tone_name\n   if( emotions[i].score > 0.3)\n   {\n   msg.payload = emotions[i].tone_name;\n   \n   }\n   }\n   msg.additional_context = { emotion: msg.payload };\n   return msg;",
+        "outputs": "1",
+        "noerr": 0,
+        "x": 141.5,
+        "y": 219,
+        "wires": [
+            [
+                "cead50d2.064548",
+                "24808878.49bb38"
+            ]
+        ]
+    },
+    {
+        "id": "24808878.49bb38",
+        "type": "watson-conversation-v1",
+        "z": "f7e7a375.4d87d",
+        "name": "Conversation",
+        "workspaceid": "Conversation-Workspace-ID",
+        "multiuser": false,
+        "context": true,
+        "x": 329.5,
+        "y": 326,
+        "wires": [
+            [
+                "100206a7.80b5c1"
+            ]
+        ]
+    },
+    {
+        "id": "100206a7.80b5c1",
+        "type": "function",
+        "z": "f7e7a375.4d87d",
+        "name": "Extract Output Text",
+        "func": "msg.payload =  {\"text\": msg.payload.output.text[0]};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 543.5,
+        "y": 202,
+        "wires": [
+            [
+                "aef137ee.f94f8",
+                "f0f00760.395d68"
+            ]
+        ]
+    },
+    {
+        "id": "cead50d2.064548",
+        "type": "debug",
+        "z": "f7e7a375.4d87d",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 703.5,
+        "y": 97,
+        "wires": []
+    },
+    {
+        "id": "f0f00760.395d68",
+        "type": "debug",
+        "z": "f7e7a375.4d87d",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 768.5,
+        "y": 289,
+        "wires": []
+    },
+    {
+        "id": "d2b8fd1c.b95b",
+        "type": "slackbot-controller",
+        "z": "",
+        "name": "Slack",
+        "bot_token": "API-token"
+    },
+    {
+        "id": "df28efef.ac0e38",
+        "type": "slackbot-controller",
+        "z": "",
+        "name": "Slacky",
+        "bot_token": "API-Token"
+    }
+]
